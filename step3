@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>No-Key Weather App</title>
+
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        background: linear-gradient(to bottom, #4facfe, #00f2fe);
+        margin: 0;
+        padding: 30px;
+        color: white;
+        text-align: center;
+    }
+    .box {
+        max-width: 380px;
+        margin: auto;
+        background: rgba(255,255,255,0.2);
+        padding: 20px;
+        border-radius: 15px;
+        box-shadow: 0 0 10px rgba(0,0,0,0.3);
+    }
+    input, button {
+        width: 80%;
+        padding: 12px;
+        border-radius: 10px;
+        border: none;
+        outline: none;
+        margin-bottom: 10px;
+        font-size: 16px;
+    }
+    button {
+        background: #005bea;
+        color: white;
+        cursor: pointer;
+    }
+    .result {
+        margin-top: 20px;
+        display: none;
+    }
+</style>
+</head>
+
+<body>
+
+<h1>🌤 Public Api Weather App</h1>
+
+<div class="box">
+    <input type="text" id="city" placeholder="Enter city name...">
+    <button onclick="getWeather()">Get Weather</button>
+
+    <div id="output" class="result">
+        <h2 id="cityName"></h2>
+        <p id="temp"></p>
+        <p id="wind"></p>
+    </div>
+</div>
+
+<script>
+// Fetch weather WITHOUT API key using Open-Meteo
+async function getWeather() {
+    const city = document.getElementById("city").value.trim();
+    if (!city) {
+        alert("Please enter a city name.");
+        return;
+    }
+
+    try {
+        // 1. Convert city name to latitude & longitude
+        const geoUrl = `https://geocoding-api.open-meteo.com/v1/search?name=${city}`;
+        const geoRes = await fetch(geoUrl);
+        const geoData = await geoRes.json();
+
+        if (!geoData.results || geoData.results.length === 0) {
+            alert("City not found. Check spelling.");
+            return;
+        }
+
+        const { latitude, longitude, name, country } = geoData.results[0];
+
+        // 2. Fetch real weather data
+        const weatherUrl = `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current_weather=true`;
+        const weatherRes = await fetch(weatherUrl);
+        const weatherData = await weatherRes.json();
+
+        const weather = weatherData.current_weather;
+
+        // 3. Display results
+        document.getElementById("output").style.display = "block";
+        document.getElementById("cityName").textContent = `${name}, ${country}`;
+        document.getElementById("temp").textContent = `🌡 Temperature: ${weather.temperature}°C`;
+        document.getElementById("wind").textContent = `🌬 Wind Speed: ${weather.windspeed} km/h`;
+
+    } catch (error) {
+        alert("Error retrieving weather.");
+        console.error(error);
+    }
+}
+</script>
+
+</body>
+</html>
