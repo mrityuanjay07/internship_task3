@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Interactive Quiz & Image Carousel</title>
+
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        margin: 0;
+        padding: 20px;
+        background: #f7f7f7;
+    }
+
+    /* ---------- QUIZ STYLES ---------- */
+    #quiz-container {
+        background: white;
+        padding: 20px;
+        border-radius: 10px;
+        max-width: 600px;
+        margin: auto;
+        box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+
+    .question {
+        font-size: 1.2rem;
+        margin-bottom: 10px;
+    }
+
+    .options label {
+        display: block;
+        padding: 10px;
+        background: #eee;
+        margin: 8px 0;
+        border-radius: 6px;
+        cursor: pointer;
+        transition: 0.3s;
+    }
+
+    .options label:hover {
+        background: #ddd;
+    }
+
+    #submit-btn {
+        padding: 10px 20px;
+        background: #007bff;
+        border: none;
+        color: white;
+        border-radius: 6px;
+        cursor: pointer;
+        margin-top: 10px;
+    }
+
+    #result {
+        font-size: 1.2rem;
+        margin-top: 15px;
+        font-weight: bold;
+    }
+
+    /* ---------- IMAGE CAROUSEL ---------- */
+    #carousel {
+        max-width: 700px;
+        margin: 40px auto;
+        position: relative;
+        border-radius: 10px;
+        overflow: hidden;
+        box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+
+    #carousel img {
+        width: 100%;
+        display: none;
+    }
+
+    #carousel img.active {
+        display: block;
+    }
+
+    .carousel-btn {
+        position: absolute;
+        top: 50%;
+        transform: translateY(-50%);
+        background: rgba(0,0,0,0.6);
+        color: white;
+        border: none;
+        padding: 10px;
+        cursor: pointer;
+        font-size: 1.5rem;
+    }
+
+    #prev { left: 10px; }
+    #next { right: 10px; }
+
+    /* ---------- RESPONSIVE MEDIA QUERIES ---------- */
+    @media (max-width: 768px) {
+        .question { font-size: 1.1rem; }
+        #submit-btn { width: 100%; }
+
+        .carousel-btn {
+            font-size: 1.2rem;
+            padding: 8px;
+        }
+    }
+
+    @media (max-width: 480px) {
+        body { padding: 10px; }
+        #quiz-container { padding: 15px; }
+        .question { font-size: 1rem; }
+
+        #carousel { margin: 20px auto; }
+    }
+</style>
+</head>
+
+<body>
+
+<h1 style="text-align:center;">Interactive Quiz & Image Carousel</h1>
+
+<!-- ================= QUIZ ================= -->
+<div id="quiz-container">
+    <div id="question-box"></div>
+    <button id="submit-btn">Submit Answer</button>
+    <div id="result"></div>
+</div>
+
+<!-- ================= CAROUSEL ================= -->
+<div id="carousel">
+    <img src="https://picsum.photos/id/1018/800/400" class="active">
+    <img src="https://picsum.photos/id/1025/800/400">
+    <img src="https://picsum.photos/id/1035/800/400">
+
+    <button class="carousel-btn" id="prev">&#8592;</button>
+    <button class="carousel-btn" id="next">&#8594;</button>
+</div>
+
+<script>
+/* --------- QUIZ SCRIPT --------- */
+const quizData = [
+    {
+        question: "Which language runs in a web browser?",
+        options: ["Python", "Java", "JavaScript", "C++"],
+        answer: 2
+    },
+    {
+        question: "What does CSS stand for?",
+        options: ["Cascading Style Sheets", "Computer Style System", "Colorful Style Syntax", "Creative Styling Structure"],
+        answer: 0
+    },
+    {
+        question: "What does HTML stand for?",
+        options: ["Hyper Trainer Marking Language", "Hyper Text Markup Language", "High Text Machine Language", "Home Tool Mark Language"],
+        answer: 1
+    }
+];
+
+let currentQuestion = 0;
+let score = 0;
+
+const questionBox = document.getElementById("question-box");
+const submitBtn = document.getElementById("submit-btn");
+const result = document.getElementById("result");
+
+function loadQuestion() {
+    const q = quizData[currentQuestion];
+    let html = `<div class="question">${q.question}</div><div class="options">`;
+
+    q.options.forEach((opt, i) => {
+        html += `
+            <label>
+                <input type="radio" name="option" value="${i}" /> ${opt}
+            </label>`;
+    });
+
+    html += "</div>";
+    questionBox.innerHTML = html;
+}
+
+submitBtn.onclick = () => {
+    const selected = document.querySelector("input[name='option']:checked");
+    if (!selected) return alert("Please select an answer!");
+
+    if (parseInt(selected.value) === quizData[currentQuestion].answer) {
+        score++;
+    }
+
+    currentQuestion++;
+
+    if (currentQuestion < quizData.length) {
+        loadQuestion();
+    } else {
+        questionBox.innerHTML = "";
+        submitBtn.style.display = "none";
+        result.textContent = `You scored ${score} out of ${quizData.length}!`;
+    }
+};
+
+loadQuestion();
+
+/* --------- CAROUSEL SCRIPT --------- */
+const images = document.querySelectorAll("#carousel img");
+let index = 0;
+
+document.getElementById("next").onclick = () => {
+    images[index].classList.remove("active");
+    index = (index + 1) % images.length;
+    images[index].classList.add("active");
+};
+
+document.getElementById("prev").onclick = () => {
+    images[index].classList.remove("active");
+    index = (index - 1 + images.length) % images.length;
+    images[index].classList.add("active");
+};
+</script>
+
+</body>
+</html>
